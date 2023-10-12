@@ -394,15 +394,50 @@ void addFaculty(int sock){
 
 void viewStudent(int sock){
 	printf("Inside the View Student Function \n");
-	
+	char id[10];
+	read(sock,&id,sizeof(id));
+	printf("Requested for %s\n",id);
+
+
 	int fd = open(Account[1], O_RDWR);
 	struct Student student;
 	int count = 0;
-	while(read(fd,&student,sizeof(student))){
-		count++;
-		lseek(fd, count*sizeof(struct Student), SEEK_SET);
-		printf("Roll No: %s\n",student.login_id);
-		
-	}
+	int int_id;
 
+
+	if (strlen(id) >= 4 && strncmp(id, "MT", 2) == 0) {
+    		char* number_str = id + 2; // Skip the first 2 characters ("MT")
+    		int_id = atoi(number_str); // Convert the remaining characters to an integer
+			printf("We Get Number as: %d\n",int_id);
+    	} else {
+    		printf("Invalid login_id format\n");
+    	}
+
+	count = int_id-1;
+	int no_of_rec,status = 1;
+	int count_fd = open(no_of[0], O_RDWR);
+	int count_size = read(count_fd, &no_of_rec, sizeof(no_of_rec));
+	printf("Total No of Records: %d Entered Record %d\n",no_of_rec,count);
+	if(count_size<=0 || count>=no_of_rec){
+		status = 0;
+		write(sock,&status,sizeof(status));
+	}
+	else{
+		write(sock,&status,sizeof(status));
+		lseek(fd, count*sizeof(struct Student), SEEK_SET);
+		read(fd,&student,sizeof(student));
+		write(sock,&student,sizeof(student));
+	}
+	// printf("ID : %s \n",student.login_id);
+	// printf("Name :%s \n",student.name);
+	// printf("Age : %d \n",student.age);
+	// printf("Email : %s \n",student.email);
+	// printf("Address: %s \n",student.address);
+
+	// while(read(fd,&student,sizeof(student))){
+	// 	count++;
+	// 	lseek(fd, count*sizeof(struct Student), SEEK_SET);
+	// 	printf("Roll No: %s\n",student.login_id);
+	// }
+	close(fd);
 }

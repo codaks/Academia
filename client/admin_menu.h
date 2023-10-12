@@ -77,6 +77,26 @@ void addFaculty(int sock) {
 }
 
 void viewStudents(int sock){
-	printf("Hello in client");
+	char id[10];
+	printf("Enter Student ID: ");
+	scanf("%s",id);
+	write(sock,&id,sizeof(id));
+	int status;
+	struct Student student;
+	read(sock,&status,sizeof(status));
+	if(status){
+		read(sock,&student,sizeof(student));
+		printf("***************  Student Details  ***************\n");
+		printf("ID : %s \n",student.login_id);
+		printf("Name :%s \n",student.name);
+		printf("Age : %d \n",student.age);
+		printf("Email : %s \n",student.email);
+		printf("Address: %s \n",student.address);
+
+	}else{
+		printf("-----------------  Invalid Student ID  ---------------\n");
+	}
+
+
 	
 }
