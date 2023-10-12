@@ -34,7 +34,7 @@ int facultyMenu(int sock, char login_id[]);
 void addStudent(int sock);
 void addFaculty(int sock);
 void viewStudent(int sock);
-
+void viewFaculty(int sock);
 
 int main() {
     signal(SIGTSTP, server_handler);
@@ -273,6 +273,8 @@ int adminMenu(int sock, char login_id[]) {
 		break;
 		case 3: addFaculty(sock);
 		break;
+		case 4: viewFaculty(sock);
+		break;
 		case 9: return -1;
 	}
 	return 0;
@@ -306,6 +308,7 @@ void addStudent(int sock) {
     snprintf(num_str, sizeof(num_str), "%03d", count);
 	strcpy(student.login_id, "MT");
 	strcat(student.login_id, num_str);
+	student.isActive = 1;
 	int fd = open(Account[1], O_RDWR);
 	struct flock lock;
 
@@ -366,6 +369,7 @@ void addFaculty(int sock){
     snprintf(num_str, sizeof(num_str), "%03d", count);
 	strcpy(faculy.login_id, "FT");
 	strcat(faculy.login_id, num_str);
+
 
 	int fd = open(Account[2], O_RDWR);
 	struct flock lock;
@@ -439,5 +443,58 @@ void viewStudent(int sock){
 	// 	lseek(fd, count*sizeof(struct Student), SEEK_SET);
 	// 	printf("Roll No: %s\n",student.login_id);
 	// }
+	close(fd);
+}
+
+void viewFaculty(int sock){
+	printf("Inside the View Faculty Function \n");
+	char id[10];
+	read(sock,&id,sizeof(id));
+	printf("Requested for %s\n",id);
+
+
+	int fd = open(Account[2], O_RDWR);
+	struct Faculty faculty;
+	int count = 0;
+	int int_id;
+
+
+	if(strlen(id) >= 4 && strncmp(id, "FT", 2) == 0) {
+    		char* number_str = id + 2; // Skip the first 2 characters ("MT")
+    		int_id = atoi(number_str); // Convert the remaining characters to an integer
+			printf("We Get Number as: %d\n",int_id);
+    }
+	else {
+    		printf("Invalid login_id format\n");
+    }
+
+	count = int_id-1;
+	int no_of_rec,status = 1;
+	int count_fd = open(no_of[1], O_RDWR);
+	int count_size = read(count_fd, &no_of_rec, sizeof(no_of_rec));
+	printf("Total No of Records: %d Entered Record %d\n",no_of_rec,count);
+	if(count_size<=0 || count>=no_of_rec){
+		printf("Invalid Faculty Details");
+		status = 0;
+		write(sock,&status,sizeof(status));
+	}
+	else{
+		write(sock,&status,sizeof(status));
+		lseek(fd, count*sizeof(struct Faculty), SEEK_SET);
+		read(fd,&faculty,sizeof(faculty));
+		write(sock,&faculty,sizeof(faculty));
+	}
+	// printf("ID : %s \n",student.login_id);
+	// printf("Name :%s \n",student.name);
+	// printf("Age : %d \n",student.age);
+	// printf("Email : %s \n",student.email);
+	// printf("Address: %s \n",student.address);
+	count= 0;
+	lseek(fd, count*sizeof(struct Faculty), SEEK_SET);
+	while(read(fd,&faculty,sizeof(faculty))){
+		count++;
+		printf("Roll No: %s\n",faculty.login_id);
+		lseek(fd, count*sizeof(struct Faculty), SEEK_SET);
+	}
 	close(fd);
 }

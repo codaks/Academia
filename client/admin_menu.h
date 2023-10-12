@@ -6,9 +6,12 @@ Date: 		04/10/2023
 
 #include "../macros.h"
 #include "../database/database.h"
+
 void addStudent(int sock);
 void addFaculty(int sock); 
 void viewStudents(int sock);
+void viewFaculty(int sock);
+
 int adminMenu(int opt,int  sock){//used in client.c
 	printf("------- Welcome to Admin Menu --------\n");
 	printf("1. Add Student\n");
@@ -32,6 +35,8 @@ int adminMenu(int opt,int  sock){//used in client.c
 		case 2: viewStudents(sock);
 		break;
 		case 3: addFaculty(sock);
+		break;
+		case 4: viewFaculty(sock);
 		break;
 
 	}
@@ -92,11 +97,38 @@ void viewStudents(int sock){
 		printf("Age : %d \n",student.age);
 		printf("Email : %s \n",student.email);
 		printf("Address: %s \n",student.address);
-
+		
 	}else{
 		printf("-----------------  Invalid Student ID  ---------------\n");
 	}
 
+}
 
+
+void viewFaculty(int sock){
+	char id[10];
+	printf("Enter Faculty ID: ");
+	scanf("%s",id);
+	write(sock,&id,sizeof(id));
+	int status;
+	struct Faculty faculty;
+	read(sock,&status,sizeof(status));
+	printf("Status is %d\n",status);
+	if(status){
+		read(sock,&faculty,sizeof(faculty));
+		printf("***************  Faculty Details  ***************\n");
+		printf("ID : %s \n",faculty.login_id);
+		printf("Name :%s \n",faculty.name);
+		printf("Age : %d \n",faculty.age);
+		printf("Email : %s \n",faculty.email);
+		printf("Address: %s \n",faculty.address);
+		
+	}else{
+		printf("-----------------  Invalid Faculty ID  ---------------\n");
+	}
+
+}
+
+void activateStudent(int sock){
 	
 }
