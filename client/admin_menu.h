@@ -11,6 +11,8 @@ void addStudent(int sock);
 void addFaculty(int sock); 
 void viewStudents(int sock);
 void viewFaculty(int sock);
+void activateStudent(int sock);
+void blockStudent(int sock);
 
 int adminMenu(int opt,int  sock){//used in client.c
 	printf("------- Welcome to Admin Menu --------\n");
@@ -38,9 +40,11 @@ int adminMenu(int opt,int  sock){//used in client.c
 		break;
 		case 4: viewFaculty(sock);
 		break;
-
+		case 5: activateStudent(sock);
+		break;
 	}
 }
+
 char *Account[3] = {"./database/accounts/admin", "./database/accounts/student", "./database/accounts/faculty"};
 void addStudent(int sock) {
 	struct Student student;
@@ -130,5 +134,17 @@ void viewFaculty(int sock){
 }
 
 void activateStudent(int sock){
-	
+	char id[10];
+	printf("Enter Student ID: ");
+	scanf("%s",id);
+	write(sock,&id,sizeof(id));	
+	printf("Student Activated\n");
+}
+
+void blockStudent(int sock){
+	char id[10];
+	printf("Enter Student ID: ");
+	scanf("%s",id);
+	write(sock,&id,sizeof(id));	
+	printf("Student Blocked\n");
 }

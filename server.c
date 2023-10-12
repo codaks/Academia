@@ -35,6 +35,8 @@ void addStudent(int sock);
 void addFaculty(int sock);
 void viewStudent(int sock);
 void viewFaculty(int sock);
+void activateStudent(int sock);
+void blockStudent(int sock);
 
 int main() {
     signal(SIGTSTP, server_handler);
@@ -275,6 +277,10 @@ int adminMenu(int sock, char login_id[]) {
 		break;
 		case 4: viewFaculty(sock);
 		break;
+		case 5: activateStudent(sock);
+		break;
+		case 6: blockStudent(sock);
+		break;
 		case 9: return -1;
 	}
 	return 0;
@@ -496,5 +502,92 @@ void viewFaculty(int sock){
 		printf("Roll No: %s\n",faculty.login_id);
 		lseek(fd, count*sizeof(struct Faculty), SEEK_SET);
 	}
+	close(fd);
+}
+
+void activateStudent(int sock){
+	printf("Inside the activateStudent Function \n");
+	char id[10];
+	read(sock,&id,sizeof(id));
+	printf("Requested for %s\n",id);
+
+	int int_id;
+
+	if(strlen(id) >= 4 && strncmp(id, "MT", 2) == 0) {
+    		char* number_str = id + 2; // Skip the first 2 characters ("MT")
+    		int_id = atoi(number_str); // Convert the remaining characters to an integer
+			printf("We Get Number as: %d\n",int_id);
+    }
+	else {
+    		printf("Invalid login_id format\n");
+    }
+
+	int count = int_id;
+	int fd = open(Account[1], O_RDWR);
+	struct flock lock;
+
+	lock.l_start = (count-1)*sizeof(struct Student); 
+	lock.l_len = sizeof(struct Student);
+	lock.l_whence = SEEK_SET;
+	lock.l_pid = getpid();
+	lock.l_type = F_WRLCK;
+	fcntl(fd,F_SETLK, &lock);
+	// write(fd, &faculy, sizeof(struct Faculty));
+
+	
+	struct Student student;
+	lseek(fd, (count-1)*sizeof(struct Student), SEEK_SET);
+	read(fd, &student, sizeof(student));
+	student.isActive = 1;
+	write(fd, &student, sizeof(student));
+	
+	// lseek(fd, count*sizeof(struct Faculty), SEEK_SET);
+	
+	lock.l_type = F_UNLCK;
+	fcntl(fd, F_SETLK, &lock);
+	close(fd);
+}
+
+
+void blockStudent(int sock){
+	printf("Inside the blockStudent Function \n");
+	char id[10];
+	read(sock,&id,sizeof(id));
+	printf("Requested for %s\n",id);
+
+	int int_id;
+
+	if(strlen(id) >= 4 && strncmp(id, "MT", 2) == 0) {
+    		char* number_str = id + 2; // Skip the first 2 characters ("MT")
+    		int_id = atoi(number_str); // Convert the remaining characters to an integer
+			printf("We Get Number as: %d\n",int_id);
+    }
+	else {
+    		printf("Invalid login_id format\n");
+    }
+
+	int count = int_id;
+	int fd = open(Account[1], O_RDWR);
+	struct flock lock;
+
+	lock.l_start = (count-1)*sizeof(struct Student); 
+	lock.l_len = sizeof(struct Student);
+	lock.l_whence = SEEK_SET;
+	lock.l_pid = getpid();
+	lock.l_type = F_WRLCK;
+	fcntl(fd,F_SETLK, &lock);
+	// write(fd, &faculy, sizeof(struct Faculty));
+
+	
+	struct Student student;
+	lseek(fd, (count-1)*sizeof(struct Student), SEEK_SET);
+	read(fd, &student, sizeof(student));
+	student.isActive = 0;
+	write(fd, &student, sizeof(student));
+	
+	// lseek(fd, count*sizeof(struct Faculty), SEEK_SET);
+	
+	lock.l_type = F_UNLCK;
+	fcntl(fd, F_SETLK, &lock);
 	close(fd);
 }
