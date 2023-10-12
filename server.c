@@ -319,7 +319,7 @@ void addStudent(int sock) {
 	if(count==1)
 		write(fd, &student, sizeof(student));
 	else{
-		lseek(fd, count*sizeof(struct Student), SEEK_SET);
+		lseek(fd, (count-1)*sizeof(struct Student), SEEK_SET);
 		write(fd, &student, sizeof(student));
 	}
 	lock.l_type = F_UNLCK;
@@ -377,8 +377,15 @@ void addFaculty(int sock){
 	lock.l_type = F_WRLCK;
 	fcntl(fd,F_SETLK, &lock);
 	// write(fd, &faculy, sizeof(struct Faculty));
+
+	if(count==1)
+		write(fd, &faculy, sizeof(faculy));
+	else{
+		lseek(fd, (count-1)*sizeof(struct Faculty), SEEK_SET);
+		write(fd, &faculy, sizeof(faculy));
+	}
 	lseek(fd, count*sizeof(struct Faculty), SEEK_SET);
-	write(fd, &faculy, sizeof(faculy));
+	
 	lock.l_type = F_UNLCK;
 	fcntl(fd, F_SETLK, &lock);
 	close(fd);
