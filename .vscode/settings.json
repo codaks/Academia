@@ -3,6 +3,7 @@
         "compare": "cpp",
         "type_traits": "cpp",
         "macros.h": "c",
-        "home_menu.h": "c"
+        "home_menu.h": "c",
+        "database.h": "c"
     }
 }

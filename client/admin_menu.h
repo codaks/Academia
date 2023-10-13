@@ -13,6 +13,9 @@ void viewStudents(int sock);
 void viewFaculty(int sock);
 void activateStudent(int sock);
 void blockStudent(int sock);
+void updateStudentDetails(int sock);
+
+
 
 int adminMenu(int opt,int  sock){//used in client.c
 	printf("------- Welcome to Admin Menu --------\n");
@@ -41,6 +44,10 @@ int adminMenu(int opt,int  sock){//used in client.c
 		case 4: viewFaculty(sock);
 		break;
 		case 5: activateStudent(sock);
+		break;
+		case 6: blockStudent(sock);
+		break;
+		case 7: updateStudentDetails(sock);
 		break;
 	}
 }
@@ -101,7 +108,7 @@ void viewStudents(int sock){
 		printf("Age : %d \n",student.age);
 		printf("Email : %s \n",student.email);
 		printf("Address: %s \n",student.address);
-		
+		printf("Sudent Status: %d \n",student.isActive);
 	}else{
 		printf("-----------------  Invalid Student ID  ---------------\n");
 	}
@@ -147,4 +154,56 @@ void blockStudent(int sock){
 	scanf("%s",id);
 	write(sock,&id,sizeof(id));	
 	printf("Student Blocked\n");
+}
+
+
+void updateStudentDetails(int sock){
+	char id[10];
+	printf("Enter Student ID: ");
+	scanf("%s",id);
+	write(sock,&id,sizeof(id));
+
+	printf("1. Change Name\n");
+	printf("2. Change Age \n");
+	printf("3. Change Address\n");
+	printf("4. Change Email\n");
+	printf("5. Change All Details\n");
+	int choice;
+	scanf("%d",&choice);
+	write(sock,&choice,sizeof(choice));
+	switch (choice)
+	{
+	case 1:
+		char name[30];
+		printf("Enter Name: ");
+		scanf("%s",name);
+		write(sock,&name,sizeof(name));
+		break;
+	case 2:
+		int age;
+		printf("Age: ");
+		scanf("%d",age);
+		write(sock,&name,sizeof(age));
+		break;
+	case 3:
+		char Address[50];
+		printf("Enter Address : ");
+		scanf("%s",Address);
+		write(sock,&name,sizeof(Address));
+		break;
+	case 4:
+		char email[30];
+		printf("Enter Email: ");
+		scanf("%s",email);
+		write(sock,&name,sizeof(email));
+		break;
+	case 5:
+		char name[30];
+		printf("Enter Name: ");
+		scanf("%s",name);
+		write(sock,&name,sizeof(name));
+		break;
+	default:
+		break;
+	}
 }
