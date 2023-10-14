@@ -1,6 +1,6 @@
 /*
-Author: 	Vicky Panchal
-Roll No.: 	MT2023098
+Author: 	Chitransh Kulshrestha
+Roll No.: 	MT2023021
 Date: 		04/10/2023
 */
 
@@ -14,7 +14,7 @@ void viewFaculty(int sock);
 void activateStudent(int sock);
 void blockStudent(int sock);
 void updateStudentDetails(int sock);
-
+void updateFacultyDetails(int sock);
 
 
 int adminMenu(int opt,int  sock){//used in client.c
@@ -48,6 +48,8 @@ int adminMenu(int opt,int  sock){//used in client.c
 		case 6: blockStudent(sock);
 		break;
 		case 7: updateStudentDetails(sock);
+		break;
+		case 8: updateFacultyDetails(sock);
 		break;
 	}
 }
@@ -145,7 +147,21 @@ void activateStudent(int sock){
 	printf("Enter Student ID: ");
 	scanf("%s",id);
 	write(sock,&id,sizeof(id));	
-	printf("Student Activated\n");
+	int format_status;
+	read(sock,&format_status,sizeof(format_status));
+	if(format_status==0){
+		printf("------------ Invalid Format  ------------ \n");
+		
+	}
+	else{
+		int count_flag;
+		read(sock,&count_flag,sizeof(count_flag));
+		if(count_flag==0){
+			printf("------------ Student Dosen't Exists ------------\n");
+			return ;
+		}
+		printf("Student Activated\n");
+	}
 }
 
 void blockStudent(int sock){
@@ -153,7 +169,20 @@ void blockStudent(int sock){
 	printf("Enter Student ID: ");
 	scanf("%s",id);
 	write(sock,&id,sizeof(id));	
-	printf("Student Blocked\n");
+	int format_status;
+	read(sock,&format_status,sizeof(format_status));
+	if(format_status==0)
+		printf("------------ Invalid Format  ------------ \n");
+	else{
+		int count_flag;
+		read(sock,&count_flag,sizeof(count_flag));
+		if(count_flag==0){
+			printf("------------ Student Dosen't Exists ------------\n");
+			return ;
+		}
+		printf("Student Blocked\n");
+	}
+	
 }
 
 
@@ -182,26 +211,71 @@ void updateStudentDetails(int sock){
 	case 2:
 		int age;
 		printf("Age: ");
-		scanf("%d",age);
-		write(sock,&name,sizeof(age));
+		scanf("%d",&age);
+		write(sock,&age,sizeof(age));
 		break;
 	case 3:
 		char Address[50];
 		printf("Enter Address : ");
 		scanf("%s",Address);
-		write(sock,&name,sizeof(Address));
+		write(sock,&Address,sizeof(Address));
 		break;
 	case 4:
 		char email[30];
 		printf("Enter Email: ");
 		scanf("%s",email);
-		write(sock,&name,sizeof(email));
+		write(sock,&email,sizeof(email));
 		break;
 	case 5:
+		
+		break;
+	default:
+		break;
+	}
+}
+
+void updateFacultyDetails(int sock){
+	char id[10];
+	printf("Enter Faculty ID: ");
+	scanf("%s",id);
+	write(sock,&id,sizeof(id));
+
+	printf("1. Change Name\n");
+	printf("2. Change Age \n");
+	printf("3. Change Address\n");
+	printf("4. Change Email\n");
+	printf("5. Change All Details\n");
+	int choice;
+	scanf("%d",&choice);
+	write(sock,&choice,sizeof(choice));
+	switch (choice)
+	{
+	case 1:
 		char name[30];
 		printf("Enter Name: ");
 		scanf("%s",name);
 		write(sock,&name,sizeof(name));
+		break;
+	case 2:
+		int age;
+		printf("Age: ");
+		scanf("%d",&age);
+		write(sock,&age,sizeof(age));
+		break;
+	case 3:
+		char Address[50];
+		printf("Enter Address : ");
+		scanf("%s",Address);
+		write(sock,&Address,sizeof(Address));
+		break;
+	case 4:
+		char email[30];
+		printf("Enter Email: ");
+		scanf("%s",email);
+		write(sock,&email,sizeof(email));
+		break;
+	case 5:
+		
 		break;
 	default:
 		break;

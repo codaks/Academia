@@ -38,7 +38,7 @@ void viewFaculty(int sock);
 void activateStudent(int sock);
 void blockStudent(int sock);
 void updateStudentDetails(int sock);
-
+void updateFaultyDetails(int sock);
 
 
 int main() {
@@ -286,6 +286,8 @@ int adminMenu(int sock, char login_id[]) {
 		break;
 		case 7: updateStudentDetails(sock);
 		break;
+		case 8: updateFaultyDetails(sock);
+		break;
 		case 9: return -1;
 	}
 	return 0;
@@ -341,11 +343,13 @@ void addStudent(int sock) {
 	close(fd);
 	printf("\n Student Login Id: %s \n", student.login_id);
 }
+
 int studentMenu(int sock, char login_id[]) {
 
 	
 	return 0;
 }
+
 int facultyMenu(int sock, char login_id[]) {
 	return 0;
 }
@@ -518,16 +522,36 @@ void activateStudent(int sock){
 
 	int int_id;
 	int status = 1;
+	int format_status = 1;
 	if(strlen(id) >= 4 && strncmp(id, "MT", 2) == 0) {
     		char* number_str = id + 2; // Skip the first 2 characters ("MT")
     		int_id = atoi(number_str); // Convert the remaining characters to an integer
 			printf("We Get Number as: %d\n",int_id);
     }
 	else {
+    		format_status = 0;
     		printf("Invalid login_id format\n");
+			write(sock,&format_status,sizeof(format_status));
+			return;
     }
 
+	write(sock,&format_status,sizeof(format_status));
 	int count = int_id;
+
+	int no_of_rec,count_flag = 1;
+	int count_fd = open(no_of[0], O_RDWR);
+	int count_size = read(count_fd, &no_of_rec, sizeof(no_of_rec));
+	printf("Total No of Records: %d Entered Record %d\n",no_of_rec,count);
+	if(count_size<=0 || count>=no_of_rec){
+		printf("Invalid Faculty Details");
+		count_flag = 0;
+		write(sock,&count_flag,sizeof(count_flag));
+		return;
+	}
+	write(sock,&count_flag,sizeof(count_flag));
+	
+
+
 	int fd = open(Account[1], O_RDWR);
 	struct flock lock;
 
@@ -562,17 +586,35 @@ void blockStudent(int sock){
 	printf("Requested for %s\n",id);
 
 	int int_id;
-
+	int format_status = 1;
 	if(strlen(id) >= 4 && strncmp(id, "MT", 2) == 0) {
     		char* number_str = id + 2; // Skip the first 2 characters ("MT")
     		int_id = atoi(number_str); // Convert the remaining characters to an integer
 			printf("We Get Number as: %d\n",int_id);
     }
 	else {
+			format_status = 0;
     		printf("Invalid login_id format\n");
+			write(sock,&format_status,sizeof(format_status));
+			return;
     }
-
+	write(sock,&format_status,sizeof(format_status));
 	int count = int_id;
+
+
+	int no_of_rec,count_flag = 1;
+	int count_fd = open(no_of[0], O_RDWR);
+	int count_size = read(count_fd, &no_of_rec, sizeof(no_of_rec));
+	printf("Total No of Records: %d Entered Record %d\n",no_of_rec,count);
+	if(count_size<=0 || count>=no_of_rec){
+		printf("Invalid Faculty Details");
+		count_flag = 0;
+		write(sock,&count_flag,sizeof(count_flag));
+		return;
+	}
+	write(sock,&count_flag,sizeof(count_flag));
+
+
 	int fd = open(Account[1], O_RDWR);
 	struct flock lock;
 
@@ -653,7 +695,7 @@ void updateStudentDetails(int sock){
 		read(sock,&age,sizeof(age));
 		// printf("Changed Name to %s\n",name);
 		student.age = age;
-		printf("Changed Age to %s\n",student.age);
+		printf("Changed Age to %d\n",student.age);
 		lseek(fd, (count-1)*sizeof(struct Student), SEEK_SET);
 		write(fd,&student,sizeof(student));
 		break;
@@ -669,7 +711,7 @@ void updateStudentDetails(int sock){
 		break;
 	case 4:
 		char email[30];
-		read(sock,&name,sizeof(email));
+		read(sock,&email,sizeof(email));
 		// printf("Changed Name to %s\n",name);
 		strcpy(student.email, email);
 		printf("Changed email to %s\n",student.email);
@@ -679,4 +721,95 @@ void updateStudentDetails(int sock){
 	default:
 		break;
 	}
+
+
+	lock.l_type = F_UNLCK;
+	fcntl(fd, F_SETLK, &lock);
+	close(fd);
+}
+
+void updateFaultyDetails(int sock){
+	printf("Inside the update Faculty Function \n");
+	char id[10];
+	read(sock,&id,sizeof(id));
+	printf("Requested for %s\n",id);
+
+	int int_id;
+
+	if(strlen(id) >= 4 && strncmp(id, "FT", 2) == 0) {
+    		char* number_str = id + 2; // Skip the first 2 characters ("MT")
+    		int_id = atoi(number_str); // Convert the remaining characters to an integer
+			printf("We Get Number as: %d\n",int_id);
+    }
+	else {
+    		printf("Invalid login_id format\n");
+    }
+
+	int count = int_id;
+	int fd = open(Account[2], O_RDWR);
+	struct flock lock;
+
+	lock.l_start = (count-1)*sizeof(struct Faculty); 
+	lock.l_len = sizeof(struct Faculty);
+	lock.l_whence = SEEK_SET;
+	lock.l_pid = getpid();
+	lock.l_type = F_WRLCK;
+	fcntl(fd,F_SETLK, &lock);
+
+
+	struct Faculty faculty;
+	lseek(fd, (count-1)*sizeof(struct Faculty), SEEK_SET);
+	read(fd, &faculty, sizeof(faculty));
+	printf("Faculty ID: %s\n",faculty.login_id);
+
+	int choice;
+	read(sock,&choice,sizeof(choice));
+	switch (choice)
+	{
+	case 1:
+		char name[30];
+		read(sock,&name,sizeof(name));
+		// printf("Changed Name to %s\n",name);
+		strcpy(faculty.name, name);
+		printf("Changed Name to %s\n",faculty.name);
+		lseek(fd, (count-1)*sizeof(struct Student), SEEK_SET);
+		write(fd,&faculty,sizeof(faculty));
+		break;
+
+	case 2:
+		int age;
+		read(sock,&age,sizeof(age));
+		// printf("Changed Name to %s\n",name);
+		faculty.age = age;
+		printf("Changed Age to %d\n",faculty.age);
+		lseek(fd, (count-1)*sizeof(struct Student), SEEK_SET);
+		write(fd,&faculty,sizeof(faculty));
+		break;
+	
+	case 3:
+		char address[50];
+		read(sock,&address,sizeof(name));
+		// printf("Changed Name to %s\n",name);
+		strcpy(faculty.address, address);
+		printf("Changed Address to %s\n",faculty.address);
+		lseek(fd, (count-1)*sizeof(struct Student), SEEK_SET);
+		write(fd,&faculty,sizeof(faculty));
+		break;
+	case 4:
+		char email[30];
+		read(sock,&email,sizeof(email));
+		// printf("Changed Name to %s\n",name);
+		strcpy(faculty.email, email);
+		printf("Changed email to %s\n",faculty.email);
+		lseek(fd, (count-1)*sizeof(struct Faculty), SEEK_SET);
+		write(fd,&faculty,sizeof(faculty));
+		break;
+	default:
+		break;
+	}
+
+
+	lock.l_type = F_UNLCK;
+	fcntl(fd, F_SETLK, &lock);
+	close(fd);
 }
