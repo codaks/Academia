@@ -12,7 +12,9 @@ void removeCourse(int sock);
 void updateCourse(int sock);
 void changePassword(int sock);
 
+
 int facultyMenu(char* login_id,int  sock){//used in client.c
+	
 	printf("\n------- Welcome to Faculty Menu --------\n");
 	printf("1. View Offering Courses \n");
 	printf("2. Add New Courses \n");
@@ -60,6 +62,7 @@ int facultyMenu(char* login_id,int  sock){//used in client.c
 		case 6: return -1;
 	}
 }
+
 
 void viewOfferingCourses(char* login_id,int sock) {
 	struct Courses course[6];
@@ -238,6 +241,17 @@ void updateCourse(int sock) {
 
 
 void changePassword(int sock) {
+	char password[PASSWORD_LENGTH];
+
+	write(STDOUT_FILENO, "Enter New Password: ", strlen("Enter New Password: "));
+	scanf(" %s", password);
+	int passLen = strlen(password);
+
+	printf("pass len: %d\n", passLen);
+	// write(sock, &passLen, sizeof(passLen));
+	write(sock, &password, sizeof(password));
+
+	write(STDOUT_FILENO, "\nPassword Changed Successfully: ", strlen("\nPassword Changed Successfully: "));
 
 }
 

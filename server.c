@@ -44,7 +44,7 @@ void viewOfferingCourses(char login_id[], int sock);
 void viewStudent(int sock);
 void addFaculty(int sock);
 void removeCourse(char login_id[], int sock);
-
+void changePassword(int sock, char login_id[]);
 
 
 int main() {
@@ -221,7 +221,7 @@ int login(int sock, int role){
 			valid = 0;
 			write(sock, &valid, sizeof(valid));
 		};
-		lseek(fd, (id)*sizeof(struct Student), SEEK_SET);
+		lseek(fd, (id-1)*sizeof(struct Student), SEEK_SET);
 		read(fd, &student, sizeof(struct Student));
 		printf("Student login %s\n", student.login_id);
 		printf("login id %s\n", login_id);
@@ -359,6 +359,7 @@ int studentMenu(int sock, char login_id[]) {
 
 int facultyMenu(int sock, char login_id[]) {
 	int choice;
+
 	read(sock, &choice, sizeof(choice));
 
 	switch(choice) {
@@ -371,6 +372,7 @@ int facultyMenu(int sock, char login_id[]) {
 		case 3: removeCourse(login_id, sock);
 		break;
 
+		case 5: changePassword(sock,login_id);
 		// case 4: updateCourse(login_id, sock);
 		// break;
 
@@ -1008,3 +1010,68 @@ void removeCourse(char login_id[], int sock) {
 	close(fd);
 }
 
+void changePassword(int sock, char login_id[]) {
+	char num_str[4];
+	strcpy(num_str, 2+login_id);
+	num_str[3] = '\0';
+	int id = atoi(num_str);
+
+	char password[PASSWORD_LENGTH];
+	int passLen;
+	// read(sock, &passLen, sizeof(passLen));
+	read(sock, &password, sizeof(password));
+
+
+	printf("password: %s\n", password);
+	struct flock lock;
+
+	if(login_id[0] == 'S') {
+		int fd = open(Account[1], O_RDWR);
+		struct Student student;
+		lock.l_start = (id-1)*sizeof(struct Student);  //lock on student record
+		lock.l_len = sizeof(struct Student);
+		lock.l_whence = SEEK_SET;
+		lock.l_pid = getpid();
+		lock.l_type = F_WRLCK;
+		fcntl(fd,F_SETLK, &lock);
+
+		lseek(fd, (id-1)*sizeof(struct Student), SEEK_SET);
+		read(fd, &student, sizeof(struct Student));
+
+		strcpy(student.password, password);
+
+		lseek(fd, (id-1)*sizeof(struct Student), SEEK_SET);
+		write(fd, &student, sizeof(struct Student));
+
+		lock.l_type = F_UNLCK;
+		fcntl(fd, F_SETLK, &lock);
+		close(fd);
+
+		printf("updated password: %s\n", student.password);
+	}
+	else if(login_id[0] == 'F') {
+		int fd = open(Account[2], O_RDWR);
+		struct Faculty faculty;
+
+		lock.l_start = (id-1)*sizeof(struct Faculty);  //lock on faculty record
+		lock.l_len = sizeof(struct Faculty);
+		lock.l_whence = SEEK_SET;
+		lock.l_pid = getpid();
+		lock.l_type = F_WRLCK;
+		fcntl(fd,F_SETLK, &lock);
+
+		lseek(fd, (id-1)*sizeof(struct Faculty), SEEK_SET);
+		read(fd, &faculty, sizeof(struct Faculty));
+
+		strcpy(faculty.password, password);
+
+		lseek(fd, (id-1)*sizeof(struct Faculty), SEEK_SET);
+		write(fd, &faculty, sizeof(struct Faculty));
+
+		lock.l_type = F_UNLCK;
+		fcntl(fd, F_SETLK, &lock);
+		close(fd);
+
+		printf("updated password: %s\n", faculty.password);
+	}
+}
