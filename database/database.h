@@ -1,9 +1,10 @@
 #include "../macros.h"
 
 struct Courses {
-    int course_id;
+    char course_id[10];
     char name[30];
     char department[20];
+    char faculty_id[10];
     int no_of_seats;
     int credits;
     int no_of_available_seats;
@@ -28,7 +29,7 @@ struct Faculty {
     char address[30];
     char email[30];
     char password[PASSWORD_LENGTH];
-    char courses_offered[6];
+    int courseCount;
 };
 
 struct Admin {

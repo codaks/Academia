@@ -51,6 +51,8 @@ int adminMenu(int opt,int  sock){//used in client.c
 		break;
 		case 8: updateFacultyDetails(sock);
 		break;
+		case 9: return -1;
+		break;
 	}
 }
 
@@ -244,7 +246,7 @@ void updateFacultyDetails(int sock){
 	printf("2. Change Age \n");
 	printf("3. Change Address\n");
 	printf("4. Change Email\n");
-	printf("5. Change All Details\n");
+	// printf("5. Change All Details\n");
 	int choice;
 	scanf("%d",&choice);
 	write(sock,&choice,sizeof(choice));

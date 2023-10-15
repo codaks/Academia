@@ -34,7 +34,7 @@ int homeMenu(int opt,int  sock){//used in client.c
 				case 2: while(studentMenu(role, sock)!=-1);
 				break;
 
-				case 3: while(facultyMenu(role, sock)!=-1);
+				case 3: while(facultyMenu(login_id, sock)!=-1);
 				break;
 
 				default: printf("Invalid Choice \n");
