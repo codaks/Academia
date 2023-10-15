@@ -31,7 +31,7 @@ int homeMenu(int opt,int  sock){//used in client.c
 				case 1: while(adminMenu(role, sock)!=-1);
 				break;
 
-				case 2: while(studentMenu(role, sock)!=-1);
+				case 2: while(studentMenu(login_id, sock)!=-1);
 				break;
 
 				case 3: while(facultyMenu(login_id, sock)!=-1);

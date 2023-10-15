@@ -45,6 +45,8 @@ void viewStudent(int sock);
 void addFaculty(int sock);
 void removeCourse(char login_id[], int sock);
 void changePassword(int sock, char login_id[]);
+void viewAllCourses(char login_id[], int sock);
+
 
 
 int main() {
@@ -353,7 +355,18 @@ void addStudent(int sock) {
 
 int studentMenu(int sock, char login_id[]) {
 
-	
+	int choice;
+	read(sock, &choice, sizeof(choice));
+
+	switch(choice) {
+		case 1: viewAllCourses(login_id,sock);
+		
+		break;
+
+		case 6: return -1;
+
+		default: return -1;
+	}
 	return 0;
 }
 
@@ -1075,3 +1088,32 @@ void changePassword(int sock, char login_id[]) {
 		printf("updated password: %s\n", faculty.password);
 	}
 }
+
+void viewAllCourses(char login_id[], int sock) {
+	int count;
+
+	int count_fd = open(no_of[2], O_RDONLY);
+	lseek(count_fd, 0, SEEK_SET);
+	read(count_fd, &count, sizeof(count));
+	close(count_fd);
+	
+	struct Courses courseItem;
+	struct Courses course[count];
+	int fd = open(Account[3], O_RDONLY);
+	int i = 0;
+	int cnt = 0;
+	lseek(fd, 0, SEEK_SET);
+	while(read(fd, &courseItem, sizeof(courseItem))>0) {
+		cnt++;
+		lseek(fd, cnt*sizeof(courseItem), SEEK_SET);
+		if(courseItem.isActive) {
+			course[i] = courseItem;
+			i++;
+		}
+		printf("Course Name: %s \n",course->name);
+	}
+	write(sock, &i, sizeof(i));
+	write(sock, &course, sizeof(course));
+}
+
+
