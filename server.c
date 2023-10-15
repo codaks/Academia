@@ -296,6 +296,7 @@ int adminMenu(int sock, char login_id[]) {
 void addStudent(int sock) {
 	struct Student student;
 	read(sock, &student, sizeof(struct Student));
+	
 	int count;
 	int count_fd = open(no_of[0], O_RDWR);
 	struct flock count_lock;
