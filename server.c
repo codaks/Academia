@@ -584,7 +584,7 @@ void activateStudent(int sock){
 	int count_fd = open(no_of[0], O_RDWR);
 	int count_size = read(count_fd, &no_of_rec, sizeof(no_of_rec));
 	printf("Total No of Records: %d Entered Record %d\n",no_of_rec,count);
-	if(count_size<=0 || count>=no_of_rec){
+	if(count_size<=0 || count>no_of_rec){
 		printf("Invalid Faculty Details");
 		count_flag = 0;
 		write(sock,&count_flag,sizeof(count_flag));
@@ -647,7 +647,7 @@ void blockStudent(int sock){
 	int count_fd = open(no_of[0], O_RDWR);
 	int count_size = read(count_fd, &no_of_rec, sizeof(no_of_rec));
 	printf("Total No of Records: %d Entered Record %d\n",no_of_rec,count);
-	if(count_size<=0 || count>=no_of_rec){
+	if(count_size<=0 || count>no_of_rec){
 		printf("Invalid Faculty Details");
 		count_flag = 0;
 		write(sock,&count_flag,sizeof(count_flag));
