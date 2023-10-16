@@ -7,6 +7,7 @@ Date: 		04/10/2023
 #include "../macros.h"
 
 void viewAllCourses(char* login_id,int sock);
+void enrollCourse(int sock);
 
 int studentMenu(char* login_id,int  sock){//used in client.c
 	printf("------- Welcome to Student Menu --------\n");
@@ -25,19 +26,24 @@ int studentMenu(char* login_id,int  sock){//used in client.c
 	{
 	case 1: viewAllCourses(login_id,sock);
 		break;
-	case 6:
-		return -1;
-	default:
+	
+	case 2: enrollCourse(sock);
+	break;
+	
+	case 6:	return -1;
+	default: return -1;
 		break;
 	}
 }
 
 void viewAllCourses(char* login_id,int sock) {
-	
+	printf("Inside View All Courses\n");
 	int n;
-	struct Courses course[n];
 	read(sock, &n, sizeof(n));
+	struct Courses course[n];
+	printf("After n read\n");
 	read(sock, &course, sizeof(course));
+	printf("After course read\n");
 	if(n >= 1) {
 		for(int i = 0; i < n; i++) {
 			write(STDOUT_FILENO, "******Course Details*****\n", strlen("******Course Details*****\n"));
@@ -61,3 +67,18 @@ void viewAllCourses(char* login_id,int sock) {
 	}
 }
 
+void enrollCourse(int sock) {
+	char courseId[5];
+	int isCourseFull;
+	printf("\nEnter course Id: ");
+	scanf(" %s", courseId);
+	write(sock, &courseId, sizeof(courseId));
+
+	read(sock, &isCourseFull, sizeof(isCourseFull));
+
+	if(isCourseFull) {
+		printf("\nCourse is Full");
+	}
+
+	printf("\nSuccessfully enrolled");
+}
